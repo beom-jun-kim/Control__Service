@@ -20,7 +20,7 @@ import wallet from '@images/cards/wallet-info.png'
       cols="12"
       md="8"
     >
-    <VCard style="font-size: 50px;">관제임</VCard>
+    
       <AnalyticsCongratulations />
     </VCol>
 
