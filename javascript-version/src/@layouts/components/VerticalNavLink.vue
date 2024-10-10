@@ -22,7 +22,7 @@ const props = defineProps({
         :icon="item.icon || 'bxs-circle'"
         class="nav-item-icon"
       />
-      <!-- 👉 Title -->
+      
       <span class="nav-item-title">
         {{ item.title }}
       </span>

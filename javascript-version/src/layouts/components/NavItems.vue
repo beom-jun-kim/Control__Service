@@ -1,111 +1,30 @@
 <script setup>
-import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue'
 import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue'
 import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
 </script>
 
 <template>
-  <!-- 👉 Dashboards -->
-  <VerticalNavGroup
-    :item="{
-      title: 'Dashboards',
-      badgeContent: '5',
-      badgeClass: 'bg-error',
-      icon: 'bx-home-smile',
-    }"
-  >
-    <VerticalNavLink
-      :item="{
-        title: 'Analytics',
-        to: '/dashboard',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'CRM',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/dashboards/crm',
-        target: '_blank',
-        badgeContent: 'Pro',
-        badgeClass: 'bg-light-primary text-primary',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'ECommerce',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/dashboards/ecommerce',
-        target: '_blank',
-        badgeContent: 'Pro',
-        badgeClass: 'bg-light-primary text-primary',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Academy',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/dashboards/academy',
-        target: '_blank',
-        badgeContent: 'Pro',
-        badgeClass: 'bg-light-primary text-primary',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Logistics',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/dashboards/logistics',
-        target: '_blank',
-        badgeContent: 'Pro',
-        badgeClass: 'bg-light-primary text-primary',
-      }"
-    />
+  <VerticalNavGroup class="top-menu" :item="{
+    title: '모니터링',
+    icon: 'bx-layout',
+  }">
+    <VerticalNavLink :item="{
+      title: '배회 인원 찾기',
+      to: '/find-monitor',
+    }" />
   </VerticalNavGroup>
 
-  <!-- 👉 Front Pages -->
-  <VerticalNavGroup
-    :item="{
-      title: 'Front Pages',
-      icon: 'bx-file',
-      badgeContent: 'Pro',
-      badgeClass: 'bg-light-primary text-primary',
-    }"
-  >
-    <VerticalNavLink
-      :item="{
-        title: 'Landing',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/front-pages/landing-page',
-        target: '_blank',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Pricing',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/front-pages/pricing',
-        target: '_blank',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Payment',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/front-pages/payment',
-        target: '_blank',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Checkout',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/front-pages/checkout',
-        target: '_blank',
-      }"
-    />
-    <VerticalNavLink
-      :item="{
-        title: 'Help Center',
-        href: 'https://demos.themeselection.com/sneat-vuetify-vuejs-admin-template/demo-1/front-pages/help-center',
-        target: '_blank',
-      }"
-    />
+  <VerticalNavGroup class="top-menu" :item="{
+    title: '회원 정보',
+    icon: 'bx-user',
+  }">
+    <VerticalNavLink :item="{
+      title: '보호관찰자 관리',
+      to: '/guardian-info',
+    }" />
   </VerticalNavGroup>
 
-  <!-- 👉 Apps & Pages -->
-  <VerticalNavSectionTitle
+  <!-- <VerticalNavSectionTitle
     :item="{
       heading: 'Apps & Pages',
     }"
@@ -181,7 +100,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
     }"
   />
 
-  <!-- 👉 User Interface -->
+
   <VerticalNavSectionTitle
     :item="{
       heading: 'User Interface',
@@ -209,7 +128,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
     }"
   />
 
-  <!-- 👉 Forms & Tables -->
+
   <VerticalNavSectionTitle
     :item="{
       heading: 'Forms & Tables',
@@ -250,7 +169,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
     }"
   />
 
-  <!-- 👉 Others -->
+
   <VerticalNavSectionTitle
     :item="{
       heading: 'Others',
@@ -281,5 +200,11 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
       icon: 'bx-phone',
       target: '_blank',
     }"
-  />
+  /> -->
 </template>
+
+<style scoped>
+.top-menu {
+  margin: 25px 0;
+}
+</style>
