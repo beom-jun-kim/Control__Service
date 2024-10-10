@@ -1,5 +1,5 @@
 <template>
-  <a
+  <!-- <a
     color="error"
     class="buy-now-button"
     href="https://themeselection.com/item/sneat-vuetify-vuejs-admin-template/"
@@ -45,11 +45,11 @@
         </VCardText>
       </VCard>
     </VMenu>
-  </a>
+  </a> -->
 </template>
 
 <style lang="scss" scoped>
-.buy-now-button,
+/* .buy-now-button,
 .button-inner {
   display: inline-flex;
   box-sizing: border-box;
@@ -114,5 +114,5 @@
   100% {
     background-position: 0% 50%;
   }
-}
+} */
 </style>
