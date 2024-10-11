@@ -46,6 +46,11 @@ export const routes = [
         component: () =>
           import("@/views/pages/guardian-manage/guardian-info.vue"),
       },
+      {
+        path: "/guardian-info/:id",
+        component: () =>
+          import("@/views/pages/guardian-manage/guardian-info-detail.vue"),
+      },
     ],
   },
   {
