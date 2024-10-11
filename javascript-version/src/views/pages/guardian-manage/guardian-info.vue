@@ -8,24 +8,14 @@ const pageSmartShoes = ref(0)
 const size = ref(10)
 const indexPage = ref(1)
 const searchUsername = ref('')
-const locListDate = ref([])
 
 const conList = async (searchValue) => {
     try {
         const searchParam = searchValue || '';
-        const response = await Control.getUserLog(searchParam, pageSmartShoes.value, size.value)
+        const response = await Control.getGuardianList(searchParam, pageSmartShoes.value, size.value)
         smartShoesEquArr.value = response.data;
     } catch (error) {
-        console.log("회원 로그 조회 실패", error);
-    }
-}
-
-const getLocList = async () => {
-    try {
-        const response = await GconContainer.gconSelect()
-        locListDate.value = response.data
-    } catch (e) {
-        console.log("지역리스트 조회 실패", e)
+        console.log("보호 관찰자 조회 실패", error);
     }
 }
 
@@ -72,7 +62,6 @@ onUnmounted(() => {
                             <th scope="col" class="text-center">이름</th>
                             <th scope="col" class="text-center">회원 ID</th>
                             <th scope="col" class="text-center">생년월일</th>
-                            <th scope="col" class="text-center">비고</th>
                         </tr>
                     </thead>
 
@@ -95,19 +84,14 @@ onUnmounted(() => {
                             </td>
                             <td>
                                 <RouterLink :to="`/guardian-info/${conList.userSid}`">
-                                    {{ conList.birth }}
-                                </RouterLink>
-                            </td>
-                            <td>
-                                <RouterLink :to="`/guardian-info/${conList.userSid}`">
-                                    {{ conList.remark }}
+                                    {{ conList.brthDe }}
                                 </RouterLink>
                             </td>
                         </tr>
                     </tbody>
                     <tbody v-else>
                         <tr>
-                            <td colspan="5">조회된 관찰자가 없습니다</td>
+                            <td colspan="4">조회된 보호 관찰자가 없습니다</td>
                         </tr>
                     </tbody>
                 </VTable>

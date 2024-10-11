@@ -4,23 +4,27 @@ import { onMounted } from 'vue';
 const map = ref(null)
 const locations = ref([{
     latitude: 35.1657791,
-    longitude: 129.1124163
+    longitude: 129.1124163,
+    rdAdr:"광안리"
 },
 {
     latitude: 35.166804,
-    longitude: 129.1144004
+    longitude: 129.1144004,
+    rdAdr:"을지로"
 },
 {
     latitude: 35.1698391,
-    longitude: 129.1310952
+    longitude: 129.1310952,
+    rdAdr:"비산동"
 },
 {
     latitude: 35.1711778,
-    longitude: 129.1271956
+    longitude: 129.1271956,
+    rdAdr:"경산역"
 },
 ])
 
-const model = ref(null)
+const model = ref(1)
 
 
 const placeMarkers = async () => {
@@ -56,10 +60,8 @@ const placeMarkers = async () => {
 
 const handleClick = (n) => {
     if (model.value === n) {
-        // 클릭한 슬라이드가 현재 선택된 슬라이드라면, 그대로 유지
         return;
     } else {
-        // 새로운 슬라이드를 클릭한 경우 model 업데이트
         model.value = n;
     }
 };
@@ -146,9 +148,6 @@ onMounted(async () => {
                     <v-expand-transition>
                         <v-sheet v-if="model != null">
                             <div class="d-flex fill-height align-center justify-center">
-                                <!-- <h3 class="text-h6">
-                                    Selected {{ model }}
-                                </h3> -->
                                 <img src="/public/images/avatars/avatar-1.png" alt="클릭한 이미지">
                             </div>
                         </v-sheet>
@@ -165,11 +164,6 @@ onMounted(async () => {
                         <v-card :class="['ma-4','anActive', selectedClass, { 'active-slide': model === n }]" color="grey-lighten-1" @click="handleClick(n)">
                             <div class="d-flex fill-height align-center justify-center">
                                 <img src="/public/images/avatars/avatar-1.png" alt="클릭한 이미지">
-                                <!-- <v-scale-transition>
-                                    <v-icon v-if="isSelected" color="white" icon="mdi-close-circle-outline"
-                                        size="48">
-                                    </v-icon>
-                                </v-scale-transition> -->
                             </div>
                         </v-card>
                     </v-slide-group-item>
@@ -228,3 +222,13 @@ select {
     opacity: 1;
 }
 </style>
+
+
+<!-- 
+    1. 초기 렌더링시 핀 꽂혀있는 곳 렌더링
+    2. 카메라 선택시 카메라 이름 박스에 표시
+    3. 카메라 선택시 아이콘 색 바뀜
+    4. 카메라 박스 초기화 버튼
+    5. 선택되어있는 박스 클릭스 카메라 이름 박스에 있는 해당 카메라 지움
+    6. 선택한 카메라에 있는 이미지들 밑 슬라이드에 표시
+-->

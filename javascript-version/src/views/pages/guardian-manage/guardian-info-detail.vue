@@ -1,8 +1,35 @@
 <script setup>
 import Control from '@/api/Control';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { onMounted } from 'vue';
 
+const route = useRoute()
+const userInfodetail = ref({})
+const guardianUserList = ref([])
+
+const loadGuardianUserDetail = async (id) => {
+    try {
+        const response = await Control.getGuardianUserDetail(id)
+        userInfodetail.value = response.data
+        await loadGuardianUserList(id)
+    } catch (e) {
+        console.lg("조회 실패", e)
+    }
+}
+
+const loadGuardianUserList = async (id) => {
+    try {
+        const response = await Control.getGuardianUserList(id)
+        guardianUserList.value = response.data
+        console.log("guardianUserList.value", guardianUserList.value)
+    } catch (e) {
+        console.lg("조회 실패", e)
+    }
+}
+
+onMounted(async () => {
+    await loadGuardianUserDetail(route.params.id)
+})
 </script>
 
 <template>
@@ -14,41 +41,38 @@ import { onMounted } from 'vue';
                         보호관찰자 상세
                     </h2>
                 </VCardText>
-                <VCardText class="roleBtn">
-                    <span>저장</span>
-                </VCardText>
                 <VCardText class="mt-4">
                     <div class="user-info">
                         <span>아이디</span>
-                        <span>test1</span>
+                        <span>{{ userInfodetail.userId }}</span>
                     </div>
 
                     <div class="user-info">
                         <span>이름</span>
-                        <span>김회원</span>
+                        <span>{{ userInfodetail.name }}</span>
                     </div>
 
                     <div class="user-info">
                         <span>생년월일</span>
-                        <span>2024-01-01</span>
+                        <span>{{ userInfodetail.brthDe }}</span>
                     </div>
 
                     <div class="user-info">
                         <span>성별</span>
-                        <span>남</span>
+                        <span>{{ userInfodetail.gender === 'F' ? '여자' : '남자' }}</span>
                     </div>
 
                     <div class="user-info">
                         <span>전화번호</span>
-                        <span>010-1234-1234</span>
+                        <span>{{ userInfodetail.phoneNumber }}</span>
                     </div>
 
-                    <div class="user-info">
+                    <!-- <div class="user-info">
                         <span style="vertical-align: top;">비고</span>
                         <textarea class="remark" placeholder="비고 내용" />
-                    </div>
+                    </div> -->
 
-                    <div class="user-result">
+                    <!-- <div class="user-result">
                         <div class="result-report">
                             <div class="title">
                                 <p>건강이상 검진 레포트</p>
@@ -120,7 +144,7 @@ import { onMounted } from 'vue';
 
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <VCol cols="12">
                         <div class="mt-4">보호자 리스트</div>
                         <VTable>
@@ -130,17 +154,20 @@ import { onMounted } from 'vue';
                                     <th scope="col" class="text-center">이름</th>
                                     <th scope="col" class="text-center">회원 ID</th>
                                     <th scope="col" class="text-center">전화번호</th>
-                                    <th scope="col" class="text-center">비고</th>
                                 </tr>
                             </thead>
 
-                            <tbody class="text-center">
+                            <tbody v-if="guardianUserList !== 0" class="text-center">
+                                <tr v-for="(guardianUser, index) in guardianUserList" :key="index">
+                                    <td>{{ index + 1 }}</td>
+                                    <td>{{ guardianUser.name }}</td>
+                                    <td>{{ guardianUser.userId }}</td>
+                                    <td>{{ guardianUser.brthDe }}</td>
+                                </tr>
+                            </tbody>
+                            <tbody v-else>
                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td colspan="4">조회된 보호 관찰자가 없습니다</td>
                                 </tr>
                             </tbody>
                         </VTable>
@@ -161,21 +188,21 @@ import { onMounted } from 'vue';
     width: 130px;
 }
 
-.roleBtn {
+/* .roleBtn {
     position: absolute;
     top: 23px;
     right: 0px;
-}
+} */
 
-.remark {
+/* .remark {
     width: 80%;
     height: 100px;
     border: 1px solid #c6c6c6;
     padding: 5px 10px;
     outline: none;
-}
+} */
 
-.user-result {
+/* .user-result {
     display: flex;
     gap: 10px;
 }
@@ -237,5 +264,5 @@ import { onMounted } from 'vue';
 
 .walk-table-th {
     margin-bottom: 10px;
-}
+} */
 </style>
