@@ -126,4 +126,8 @@ li.active {
     background: #696CFF;
     border: none;
 }
+
+a {
+    color: inherit
+}
 </style>

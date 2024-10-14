@@ -1,36 +1,178 @@
 <script setup>
 import { onMounted } from 'vue';
 
+const addRadio = ref("nomal")
 const map = ref(null)
+const markers = ref([])
 const locations = ref([{
     latitude: 35.1657791,
     longitude: 129.1124163,
-    rdAdr:"광안리"
+    rdAdr: "부산 수영구 남천동로 100"
 },
 {
     latitude: 35.166804,
     longitude: 129.1144004,
-    rdAdr:"을지로"
+    rdAdr: "부산 수영구 남천동로108번길 31"
 },
 {
     latitude: 35.1698391,
     longitude: 129.1310952,
-    rdAdr:"비산동"
+    rdAdr: "경상북도 봉화군 석포면 석포로1길 33"
 },
 {
     latitude: 35.1711778,
     longitude: 129.1271956,
-    rdAdr:"경산역"
+    rdAdr: "경상남도 양산시 상북면 율리길 13"
 },
 ])
 
+
+// 실종시간 (시작)
+const startDisappearanceSelect = ref({ time: '실종시간(시작)' })
+const startDisappearanceItems = [
+    { time: '1시' },
+    { time: '2시' },
+    { time: '3시' },
+    { time: '4시' },
+    { time: '5시' },
+]
+
+
+// 실종시간 (종료)
+const endDisappearanceSelect = ref({ time: '실종시간(종료)' })
+const endDisappearanceItems = [
+    { time: '1시' },
+    { time: '2시' },
+    { time: '3시' },
+    { time: '4시' },
+    { time: '5시' },
+]
+
+
+// 지역 선택
+const cityesSelect = ref([])
+const cityesItems = [
+    '서울특별시',
+    '부산광역시',
+    '대구광역시',
+    '인천광역시',
+    '광주광역시',
+    '대전광역시',
+    '울산광역시',
+    '세종특별자치시',
+    '경기도',
+    '강원특별자치도',
+    '충청북도',
+    '충청남도',
+    '전북특별자치도',
+    '전라남도',
+    '경상북도',
+    '경상남도',
+    '제주특별자치도',
+]
+
+// 상의 종류
+const typeOfTopSelect = ref({ top: '상의 종류' })
+const typeOfTopItems = [
+    { top: '반팔' },
+    { top: '긴팔' },
+    { top: '5부' },
+    { top: '7부' },
+]
+
+// 상의 색상
+const colorOfTopSelect = ref({ color: '상의 색상' })
+const colorOfTopItems = [
+    { color: '빨강' },
+    { color: '파랑' },
+    { color: '검정' },
+    { color: '초록' },
+]
+
+// 하의 종류
+const typeOfBottomSelect = ref({ bottom: '하의 종류' })
+const typeOfBottomItems = [
+    { bottom: '긴바지' },
+    { bottom: '반바지' },
+    { bottom: '트레이닝' },
+    { bottom: '7부' },
+]
+
+// 하의 종류
+const ColorOfBottomSelect = ref({ color: '하의 색상' })
+const ColorOfBottomItems = [
+    { color: '긴바지' },
+    { color: '반바지' },
+    { color: '트레이닝' },
+    { color: '7부' },
+]
+
+// 악세사리
+const accSelect = ref({ acc: '악세사리' })
+const accItems = [
+    { acc: '팔찌' },
+    { acc: '모자' },
+    { acc: '안경' },
+    { acc: '귀걸이' },
+]
+
 const model = ref(1)
 
+const images = ref([
+    {
+        latitude: 37.485682,
+        longitude: 126.986358,
+        url: "/public/images/avatars/avatar-1.png",
+    },
+    {
+        latitude: 37.486491,
+        longitude: 126.981876,
+        url: "/public/images/avatars/bird-9078403_1280.jpg",
+    },
+    {
+        latitude: 37.555946,
+        longitude: 126.972317,
+        url: "/public/images/avatars/darling-7853389_640.jpg",
+    },
+    {
+        latitude: 37.5384876,
+        longitude: 127.0732147,
+        url: "/public/images/avatars/japan-9074037_1280.jpg",
+    },
+    {
+        latitude: 37.4909472,
+        longitude: 126.971493,
+        url: "/public/images/avatars/mountains-7957191_1280.jpg",
+    },
+    {
+        latitude: 37.4794939,
+        longitude: 126.9931207,
+        url: "/public/images/avatars/watzmann-9024268_1280.jpg",
+    },
+    {
+        latitude: 37.4886232,
+        longitude: 126.9668169,
+        url: "/public/images/avatars/wave-9067749_1280.jpg",
+    },
+    {
+        latitude: 37.4901004,
+        longitude: 127.0063426,
+        url: "/public/images/avatars/etretat-7391029_1280.jpg",
+    },
+    {
+        latitude: 37.4846519,
+        longitude: 126.981632,
+        url: "/public/images/avatars/penguins-9028827_1280.jpg",
+    },
+]);
 
+// 초기 렌더링
 const placeMarkers = async () => {
     try {
+        // const bounds = new naver.maps.LatLngBounds();
         // const response = await Map.containerInfo();
         // locations.value = response.data;
+
         locations.value.forEach(location => {
             const marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(location.latitude, location.longitude),
@@ -40,30 +182,84 @@ const placeMarkers = async () => {
                     size: new naver.maps.Size(55, 53),
                 }
             });
+
+            // bounds.extend(new naver.maps.LatLng(location.latitude, location.longitude));
+
             const infowindow = new naver.maps.InfoWindow({
                 content: `<div style="padding:10px;"><a href="https://map.naver.com/v5/search/${encodeURIComponent(location.rdAdr)}" style="color: rgb(0, 104, 195);">${location.rdAdr}</a></div>`,
                 borderWidth: 0,
                 disableAnchor: true,
             });
+
+            naver.maps.Event.addListener(marker, 'mouseover', () => {
+                infowindow.open(map.value, marker);
+
+            });
+            naver.maps.Event.addListener(marker, 'mouseout', () => {
+                infowindow.close();
+            });
+
             naver.maps.Event.addListener(marker, 'click', () => {
-                if (infowindow.getMap()) {
-                    infowindow.close();
+                const currentIcon = marker.getIcon().url;
+                if (currentIcon === './images/avatars/app_logo_04.png') {
+                    marker.setIcon({
+                        url: './images/avatars/active_marker.png',
+                        size: new naver.maps.Size(55, 53),
+                    });
                 } else {
-                    infowindow.open(map.value, marker);
+                    marker.setIcon({
+                        url: './images/avatars/app_logo_04.png',
+                        size: new naver.maps.Size(55, 53),
+                    });
                 }
             });
         });
-    } catch (error) {
-        console.log("컨테이너 위치 조회 실패", error);
-    }
-}
 
-const handleClick = (n) => {
+        map.value.fitBounds(bounds);
+
+    } catch (error) {
+        console.log("카메라 위치 조회 실패", error);
+    }
+};
+
+
+// 슬라이드 이미지 클릭
+const slideImgHandleClick = (n, latitude, longitude) => {
     if (model.value === n) {
         return;
     } else {
         model.value = n;
     }
+
+    markers.value.forEach(marker => marker.setMap(null));
+    markers.value = [];
+    
+    const position = new naver.maps.LatLng(latitude, longitude);
+    map.value.setCenter(position);
+    map.value.setZoom(15);
+
+    const marker = new naver.maps.Marker({
+        position: position,
+        map: map.value,
+        icon: {
+            url: './img/app_logo_04.png',
+            size: new naver.maps.Size(55, 53)
+        }
+    });
+    const infowindow = new naver.maps.InfoWindow({
+        content: `<div style="padding:10px;"><a href="https://map.naver.com/v5/search/${encodeURIComponent(rdAdr)}" style="color: rgb(0, 104, 195);">${rdAdr}</a></div>`,
+        borderWidth: 0,
+        disableAnchor: true,
+    });
+    naver.maps.Event.addListener(marker, 'click', () => {
+        if (infowindow.getMap()) {
+            infowindow.close();
+        } else {
+            infowindow.open(this.map, marker);
+        }
+    });
+
+    markers.value.fitBounds(bounds);
 };
 
 
@@ -77,93 +273,91 @@ onMounted(async () => {
 <template>
     <div>
         <VCard title="배회 인원 찾기">
-            <VRow class="px-6 mb-4 select-box">
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>실종시간(시작)</option>
-                        <option>1시</option>
-                        <option>2시</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>실종시간(종료)</option>
-                        <option>1시</option>
-                        <option>2시</option>
-                    </select>
-                </VCol>
-                <VCol cols="7" class="pa-1">
-                    <select multiple>
-                        <option>카메라 위치 다중 선택</option>
-                        <option>1시</option>
-                        <option>2시</option>
-                    </select>
-                </VCol>
-                <VCol cols="1" class="pa-1">
-                    <VBtn class="search-user-info">검색</VBtn>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>상의 종류</option>
-                        <option>반팔</option>
-                        <option>긴팔</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>상의 색상</option>
-                        <option>노랑</option>
-                        <option>검정</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>하의 종류</option>
-                        <option>반바지</option>
-                        <option>긴바지</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>하의 색상</option>
-                        <option>노랑</option>
-                        <option>검정</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <select>
-                        <option>악세사리</option>
-                        <option>귀걸이</option>
-                        <option>팔찌</option>
-                    </select>
-                </VCol>
-                <VCol cols="2" class="pa-1">
-                    <VFileInput label="이미지 파일 선택" prepend-icon="mdi-paperclip" />
-                </VCol>
-            </VRow>
+            <div class="px-6">
+                <div class="radio-box">
+                    <div class="radio-box-wrap">
+                        <input type="radio" id="addPhone" name="addId" v-model="addRadio" value="nomal">
+                        <label for="addPhone">일반 검색</label>
+                    </div>
+                    <div class="radio-box-wrap">
+                        <input type="radio" id="addId" name="addId" v-model="addRadio" value="img">
+                        <label for="addId">이미지 검색</label>
+                    </div>
+                </div>
+
+                <VRow class="mb-4" v-if="addRadio === 'nomal'">
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="startDisappearanceSelect" :items="startDisappearanceItems" item-title="time"
+                            item-value="abbr" label="실종시간(시작)" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="endDisappearanceSelect" :items="endDisappearanceItems" item-title="time"
+                            item-value="abbr" label="실종시간(종료)" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="8" class="pa-1">
+                        <v-select v-model="cityesSelect" :items="cityesItems" label="지역선택" multiple
+                            persistent-hint></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="typeOfTopSelect" :items="typeOfTopItems" item-title="top" item-value="abbr"
+                            label="상의 종류" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="colorOfTopSelect" :items="colorOfTopItems" item-title="color"
+                            item-value="abbr" label="상의 색상" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="typeOfBottomSelect" :items="typeOfBottomItems" item-title="bottom"
+                            item-value="abbr" label="하의 종류" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="ColorOfBottomSelect" :items="ColorOfBottomItems" item-title="color"
+                            item-value="abbr" label="하의 색상" persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <v-select v-model="accSelect" :items="accItems" item-title="acc" item-value="abbr" label="악세사리"
+                            persistent-hint return-object single-line></v-select>
+                    </VCol>
+                    <VCol cols="2" class="pa-1">
+                        <VBtn class="search-user-info" @click="searchContainer">검색</VBtn>
+                    </VCol>
+                </VRow>
+                <VRow class="mb-4" v-if="addRadio === 'img'">
+                    <VCol cols="6" class="pa-1">
+                        <VFileInput label="이미지 파일 선택" prepend-icon="mdi-paperclip" />
+                    </VCol>
+                    <VCol cols="1" class="pa-1">
+                        <VBtn class="search-user-info" @click="searchContainer">검색</VBtn>
+                    </VCol>
+                </VRow>
+            </div>
 
             <div class="px-6 d-flex gap-5">
                 <div id="map" style="width: 100%; height: 700px"></div>
-                <div class="click-main-img">
+                <div class="click-main-img" v-if="model !== null">
                     <v-expand-transition>
-                        <v-sheet v-if="model != null">
+                        <v-sheet>
                             <div class="d-flex fill-height align-center justify-center">
-                                <img src="/public/images/avatars/avatar-1.png" alt="클릭한 이미지">
+                                <img :src="images[model - 1].url" alt="선택된 이미지" />
+                            </div>
+                            <div class="mt-2">
+                                <span>위치 : 동래 카메라 3번 (동래역 3번출구)</span><br />
+                                <span>시간 : 2024-07-22 오후 6시 30분 27초</span>
                             </div>
                         </v-sheet>
                     </v-expand-transition>
-                    <div class="mt-2">
-                        <span>위치 : 동래 카메라 3번 (동래역 3번출구)</span><br />
-                        <span>시간 : 2024-07-22 오후 6시 30분 27초</span>
-                    </div>
                 </div>
             </div>
             <v-sheet class="mx-auto" elevation="8">
-                <v-slide-group v-model="model" class="pa-4" selected-class="bg-primary" show-arrows>
-                    <v-slide-group-item v-for="n in 15" :key="n" v-slot="{ isSelected, toggle, selectedClass }">
-                        <v-card :class="['ma-4','anActive', selectedClass, { 'active-slide': model === n }]" color="grey-lighten-1" @click="handleClick(n)">
+                <v-slide-group v-if="images !== 0" v-model="model" class="pa-4" selected-class="bg-primary" show-arrows>
+                    <v-slide-group-item v-for="(image, index) in images" :key="index"
+                        v-slot="{ isSelected, toggle, selectedClass }">
+                        <v-card :class="['ma-4', 'anActive', selectedClass, { 'active-slide': model === index + 1 }]"
+                            color="grey-lighten-1"
+                            @click="slideImgHandleClick(index + 1, image.latitude, image.longitude)" height="200"
+                            width="200">
                             <div class="d-flex fill-height align-center justify-center">
-                                <img src="/public/images/avatars/avatar-1.png" alt="클릭한 이미지">
+                                <img :src="image.url" alt="슬라이드 이미지" style="width: 100%; height: 100%;">
                             </div>
                         </v-card>
                     </v-slide-group-item>
@@ -174,11 +368,35 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.radio-box {
+    display: flex;
+    width: 100%;
+    margin: 0 0 25px;
+}
+
+.radio-box .radio-box-wrap {
+    white-space: nowrap;
+    font-size: 17px;
+}
+
+.radio-box .radio-box-wrap:first-child {
+    margin-right: 40px;
+}
+
+.radio-box input {
+    margin-right: 7px;
+    accent-color: #111;
+}
+
+.radio-box label {
+    cursor: pointer;
+}
+
 select {
     border: 1px solid rgba(34, 48, 62, 0.217);
     padding: 0 10px;
     width: 100%;
-    height: 38px;
+    height: 40px;
     border-radius: 5px;
     outline: none;
     cursor: pointer;
@@ -186,15 +404,23 @@ select {
     background-size: 16px 16px;
 }
 
-.select-box {
-    position: relative;
+.camera-place {
+    width: 100%;
+    height: 40px;
+    border: 1px solid rgba(34, 48, 62, 0.217);
+    overflow-y: auto;
+    border-radius: 5px;
+    padding: 5px 10px;
+    line-height: 2;
+    scroll-snap-type: y mandatory;
+}
+
+.camera-place span {
+    scroll-snap-align: start;
 }
 
 .search-user-info {
-    position: absolute;
-    top: 4px;
-    right: 30px;
-    width: 7%;
+    width: 100%;
 }
 
 .mdi-paperclip {
@@ -202,7 +428,7 @@ select {
 }
 
 #map {
-    flex: 2;
+    flex: 3;
 }
 
 .click-main-img {
