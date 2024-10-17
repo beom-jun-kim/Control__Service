@@ -68,9 +68,18 @@ const selectBoxSearch = () => {
         )
 
         const cityesSelectCctvSid = locations.value?.cctvList?.map((item) => item) || []
+
         const cityesSelectArr = cityesSelect.value?.map((item) => item) || []
         const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
+        console.log("cityesSelectCctvSidFilter", cityesSelectCctvSidFilter)
+
+        const cityesSelectCctvSidResultUiActive = cityesSelectCctvSidFilter.map((item) => item.cctvSid)
+        console.log("cityesSelectCctvSidResultUiActive", cityesSelectCctvSidResultUiActive)
+
+        
+
         const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
+        console.log("cityesSelectCctvSidResult", cityesSelectCctvSidResult)
 
         selectBoxSearchReturn(
             startDisappearance,
@@ -82,12 +91,15 @@ const selectBoxSearch = () => {
             colorOfTopSelect.value,
             typeOfBottomSelect.value,
             colorOfBottomSelect.value,
-            accSelect.value
+            accSelect.value,
+            selectedCctvSids.value
         )
     }
 }
 
-const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac) => {
+const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac, scs) => {
+    console.log("1212", ci)
+    console.log("1111", st, en, ci, ge, ag, tyT, coT, tyB, coB, ac, scs)
     let acArr;
     if (Array.isArray(ac)) {
         acArr = ac.map((item) => item.concat()).join(',')
@@ -172,9 +184,11 @@ const placeMarkers = async () => {
                         size: new naver.maps.Size(30, 30),
                     });
 
-                    selectedCctvSids.value = location.value.cctvList.map(item => item)
-                    console.log("selectedCctvSids.value", selectedCctvSids.value)
+                    const { _lat, _lng } = marker.position;
 
+                    const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
+                    const selectCctvSid = clickCctv.find((item) => item.cctvSid)
+                    selectedCctvSids.value.push(selectCctvSid)
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',

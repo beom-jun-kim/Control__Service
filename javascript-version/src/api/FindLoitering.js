@@ -38,6 +38,7 @@ class FindLoitering {
 
     return await http.get(url);
   }
+
 }
 
 export default new FindLoitering();
