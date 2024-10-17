@@ -5,7 +5,11 @@ import FindLoitering from '@/api/FindLoitering';
 const addRadio = ref("nomal")
 const map = ref([])
 const locations = ref([])
+const controlPage = ref(0)
+const selectedCctvSids = ref([]);
 
+// 슬라이드
+const images = ref([]);
 
 // 상의 종류
 const typeOfTopSelect = ref()
@@ -40,41 +44,47 @@ const cityesSelect = ref()
 const cityesItems = ref([])
 
 // 실종시간 (시작)
-const startYearDisappearanceSelect = ref()
-const startMonthsDisappearanceSelect = ref()
-const startDayDisappearanceSelect = ref()
-const startHoursDisappearanceSelect = ref()
-const startMinutesDisappearanceSelect = ref()
+const startDisappearanceSelect = ref()
 
 // 실종구간 (종료)
-const endtYearDisappearanceSelect = ref()
-const endtMonthsDisappearanceSelect = ref()
-const endtDayDisappearanceSelect = ref()
-const endtHoursDisappearanceSelect = ref()
-const endtMinutesDisappearanceSelect = ref()
+const endDisappearanceSelect = ref()
 
-const startYear = ref(1900)
-const currentYear = new Date().getFullYear()
-const months = ref(Array.from({ length: 12 }, (v, k) => k + 1))
-const day = ref(Array.from({ length: 31 }, (v, k) => k + 1))
-const hours = ref(Array.from({ length: 24 }, (v, k) => k + 1))
-const minutes = ref(Array.from({ length: 60 }, (v, k) => k + 1))
-
-const formatDateTime = (year, month, day, hours, minutes) => {
-    const formattedDate = `${String(year)}-${String(month).padStart(2, 0)}-${String(day).padStart(2, 0)}`
-    const formattedTime = `${String(hours).padStart(2, 0)}:${String(minutes).padStart(2, 0)}:00`
-    return `${formattedDate}T${formattedTime}`
+const formatDateTime = (year) => {
+    const formattedDate = `${String(year)}:00`
+    return formattedDate
 }
 
 // 셀렉트 박스 검색
 const selectBoxSearch = () => {
-    const startDisappearance = formatDateTime(startYearDisappearanceSelect.value, startMonthsDisappearanceSelect.value, startDayDisappearanceSelect.value, startHoursDisappearanceSelect.value, startMinutesDisappearanceSelect.value)
-    const endDisappearance = formatDateTime(endtYearDisappearanceSelect.value, endtMonthsDisappearanceSelect.value, endtDayDisappearanceSelect.value, endtHoursDisappearanceSelect.value, endtMinutesDisappearanceSelect.value)
-    const cityesSelectCctvSid = locations.value.cctvList.map((item) => item)
-    const cityesSelectArr = cityesSelect.value.map((item) => item)
-    const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
-    const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
-    selectBoxSearchReturn(startDisappearance || null, endDisappearance || null, cityesSelectCctvSidResult || null, genderSelect.value || null, ageSelect.value || null, typeOfTopSelect.value || null, colorOfTopSelect.value || null, typeOfBottomSelect.value || null, colorOfBottomSelect.value || null, accSelect.value || null)
+    if (startDisappearanceSelect.value >= endDisappearanceSelect.value) {
+        alert("종료구간이 시작구간보다 앞서있거나 같습니다 다시 선택하여 주세요")
+    } else {
+        const startDisappearance = formatDateTime(
+            startDisappearanceSelect.value,
+        )
+
+        const endDisappearance = formatDateTime(
+            endDisappearanceSelect.value,
+        )
+
+        const cityesSelectCctvSid = locations.value?.cctvList?.map((item) => item) || []
+        const cityesSelectArr = cityesSelect.value?.map((item) => item) || []
+        const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
+        const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
+
+        selectBoxSearchReturn(
+            startDisappearance,
+            endDisappearance,
+            cityesSelectCctvSidResult,
+            genderSelect.value,
+            ageSelect.value,
+            typeOfTopSelect.value,
+            colorOfTopSelect.value,
+            typeOfBottomSelect.value,
+            colorOfBottomSelect.value,
+            accSelect.value
+        )
+    }
 }
 
 const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac) => {
@@ -84,15 +94,21 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac)
     } else {
         acArr = ac;
     }
+    if (st === "undefined:00") {
+        st = undefined
+    }
+    if (en === "undefined:00") {
+        en = undefined
+    }
+    console.log(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
     try {
-        const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci)
-        console.log("response.data", response.data)
+        const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
+        images.value = response.data?.content || [];
+        console.log("images.value", images.value)
     } catch (e) {
         console.log('배회인원 찾기 실패', e)
     }
 }
-
-
 
 const loadSelectBoxDate = async () => {
     try {
@@ -110,68 +126,7 @@ const loadSelectBoxDate = async () => {
     }
 }
 
-
-const years = computed(() => {
-    const years = [];
-    for (let i = startYear.value; i <= currentYear; i++) {
-        years.push(i);
-    }
-    return years.reverse();
-});
-
 const model = ref(0)
-
-const images = ref([
-    {
-        latitude: 36.5083073428532,
-        longitude: 127.262445014563,
-        address: "세종 절재로 194 중앙타운 202호",
-        url: "/public/images/avatars/avatar-1.png",
-    },
-    {
-        latitude: 36.4981148,
-        longitude: 127.3132612,
-        address: "세종 한누리대로 1820 205,206호",
-        url: "/public/images/avatars/bird-9078403_1280.jpg",
-    },
-    {
-        latitude: 36.3955991096515,
-        longitude: 127.405768056295,
-        address: "대전 유성구 문지로 323-21 1층",
-        url: "/public/images/avatars/darling-7853389_640.jpg",
-    },
-    {
-        latitude: 36.3346887701113,
-        longitude: 127.450172736698,
-        address: "대전 유성구 문지로 323-21 1층",
-        url: "/public/images/avatars/japan-9074037_1280.jpg",
-    },
-    // {
-    //     latitude: 37.4909472,
-    //     longitude: 126.971493,
-    //     url: "/public/images/avatars/mountains-7957191_1280.jpg",
-    // },
-    // {
-    //     latitude: 37.4794939,
-    //     longitude: 126.9931207,
-    //     url: "/public/images/avatars/watzmann-9024268_1280.jpg",
-    // },
-    // {
-    //     latitude: 37.4886232,
-    //     longitude: 126.9668169,
-    //     url: "/public/images/avatars/wave-9067749_1280.jpg",
-    // },
-    // {
-    //     latitude: 37.4901004,
-    //     longitude: 127.0063426,
-    //     url: "/public/images/avatars/etretat-7391029_1280.jpg",
-    // },
-    // {
-    //     latitude: 37.4846519,
-    //     longitude: 126.981632,
-    //     url: "/public/images/avatars/penguins-9028827_1280.jpg",
-    // },
-]);
 
 
 // 초기 렌더링
@@ -216,6 +171,10 @@ const placeMarkers = async () => {
                         url: './images/avatars/camera_active_color.png',
                         size: new naver.maps.Size(30, 30),
                     });
+
+                    selectedCctvSids.value = location.value.cctvList.map(item => item)
+                    console.log("selectedCctvSids.value", selectedCctvSids.value)
+
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',
@@ -313,45 +272,19 @@ onMounted(async () => {
                 <div class="mb-4" v-if="addRadio === 'nomal'">
                     <VCol>
                         <div class="select-box-title">
-                            <span>실종구간 (시작)</span>
+                            <span>실종 탐색 구간 (시작)</span>
                         </div>
                         <VRow>
                             <VCol class="px-1">
-                                <v-select v-model="startYearDisappearanceSelect" :items="years" label="연도"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="startMonthsDisappearanceSelect" :items="months" label="월"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="startDayDisappearanceSelect" :items="day" label="일"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="startHoursDisappearanceSelect" :items="hours" label="시간"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="startMinutesDisappearanceSelect" :items="minutes"
-                                    label="분"></v-select>
+                                <VTextField type="datetime-local" v-model="startDisappearanceSelect" />
                             </VCol>
                         </VRow>
                         <div class="select-box-title">
-                            <span>실종구간 (종료)</span>
+                            <span>실종 탐색 구간 (종료)</span>
                         </div>
                         <VRow>
                             <VCol class="px-1">
-                                <v-select v-model="endtYearDisappearanceSelect" :items="years" label="연도"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="endtMonthsDisappearanceSelect" :items="months" label="월"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="endtDayDisappearanceSelect" :items="day" label="일"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="endtHoursDisappearanceSelect" :items="hours" label="시간"></v-select>
-                            </VCol>
-                            <VCol class="px-1">
-                                <v-select v-model="endtMinutesDisappearanceSelect" :items="minutes"
-                                    label="분"></v-select>
+                                <VTextField type="datetime-local" v-model="endDisappearanceSelect" />
                             </VCol>
                         </VRow>
                         <div class="select-box-title">
@@ -408,23 +341,24 @@ onMounted(async () => {
             </div>
 
             <div class="px-6 d-flex gap-5">
-                <div id="map" style="width: 100%; height: 700px"></div>
-                <div class="click-main-img" v-if="model !== null">
+                <div id="map" style="width: 100%; height: 700px" :class="{ 'slideVisibleMap': images[model] }"></div>
+                <div class="click-main-img" :class="{ 'slideVisible': images[model] }" v-if="model !== null">
                     <v-expand-transition>
-                        <v-sheet>
+                        <v-sheet v-if="images[model]">
                             <div class="d-flex fill-height align-center justify-center">
-                                <img :src="images[model].url" alt="선택된 이미지" />
+                                <img :src="`http://localhost:8082/uploads/${images[model]?.fileName}`" alt="선택된 이미지" />
                             </div>
                             <div class="mt-2">
-                                <span>위치 : 동래 카메라 3번 (동래역 3번출구)</span><br />
-                                <span>시간 : 2024-07-22 오후 6시 30분 27초</span>
+                                <span>위치 : {{ images[model].address }}</span><br />
+                                <span>시간 : {{ images[model].createDate }}</span>
                             </div>
                         </v-sheet>
                     </v-expand-transition>
                 </div>
             </div>
             <v-sheet class="mx-auto" elevation="8">
-                <v-slide-group v-if="images !== 0" v-model="model" class="pa-4" selected-class="bg-primary" show-arrows>
+                <v-slide-group v-if="images.length !== 0" v-model="model" class="pa-4" selected-class="bg-primary"
+                    show-arrows>
                     <v-slide-group-item v-for="(image, index) in images" :key="index"
                         v-slot="{ isSelected, toggle, selectedClass }">
                         <v-card :class="['ma-4', 'anActive', selectedClass, { 'active-slide': model === index }]"
@@ -432,11 +366,13 @@ onMounted(async () => {
                             @click="slideImgHandleClick(index, image.latitude, image.longitude, image.address)"
                             height="200" width="200">
                             <div class="d-flex fill-height align-center justify-center">
-                                <img :src="image.url" alt="슬라이드 이미지" style="width: 100%; height: 100%;">
+                                <img :src="`http://localhost:8082/uploads/${image?.fileName}`" alt="슬라이드 이미지"
+                                    style="width: 100%; height: 100%;">
                             </div>
                         </v-card>
                     </v-slide-group-item>
                 </v-slide-group>
+                <v-slide-group v-else class="py-4"></v-slide-group>
             </v-sheet>
         </VCard>
     </div>
@@ -517,10 +453,14 @@ select {
 }
 
 #map {
+    flex: 1;
+}
+
+#map.slideVisibleMap {
     flex: 3;
 }
 
-.click-main-img {
+.click-main-img.slideVisible {
     flex: 1;
 }
 

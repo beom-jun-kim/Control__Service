@@ -18,10 +18,25 @@ class FindLoitering {
     endDate,
     accessories,
     cctvSids,
+    page
   ) {
-    return await http.get(
-      `/cctv/search?gender=${gender}&ageGroup=${ageGroup}&upperType=${upperType}&upperColor=${upperColor}&lowerType=${lowerType}&lowerColor=${lowerColor}&startDate=${startDate}&endDate=${endDate}&accessories=${accessories}&cctvSids=${cctvSids}`
-    );
+    const params = new URLSearchParams();
+
+    if (gender) params.append("gender", gender);
+    if (ageGroup) params.append("ageGroup", ageGroup);
+    if (upperType) params.append("upperType", upperType);
+    if (upperColor) params.append("upperColor", upperColor);
+    if (lowerType) params.append("lowerType", lowerType);
+    if (lowerColor) params.append("lowerColor", lowerColor);
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+    if (accessories) params.append("accessories", accessories);
+    if (cctvSids) params.append("cctvSids", cctvSids);
+    if (page) params.append("page", page);
+
+    const url = `/cctv/search?${params.toString()}`;
+
+    return await http.get(url);
   }
 }
 
