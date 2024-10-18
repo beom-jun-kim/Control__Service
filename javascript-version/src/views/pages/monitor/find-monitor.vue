@@ -1,12 +1,17 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import FindLoitering from '@/api/FindLoitering';
+import { objectKeys, objectMap } from '@antfu/utils';
 
 const addRadio = ref("nomal")
 const map = ref([])
 const locations = ref([])
 const controlPage = ref(0)
 const selectedCctvSids = ref([]);
+const markers = ref([]);
+const selectedCctvSidsResult = ref('')
+const selectedCctvSidsResultDelAndAdd = ref('')
+const selectedCctvSidsActiveResult = ref('')
 
 // 슬라이드
 const images = ref([]);
@@ -67,24 +72,15 @@ const selectBoxSearch = () => {
             endDisappearanceSelect.value,
         )
 
-        const cityesSelectCctvSid = locations.value?.cctvList?.map((item) => item) || []
-
-        const cityesSelectArr = cityesSelect.value?.map((item) => item) || []
-        const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
-        console.log("cityesSelectCctvSidFilter", cityesSelectCctvSidFilter)
-
-        const cityesSelectCctvSidResultUiActive = cityesSelectCctvSidFilter.map((item) => item.cctvSid)
-        console.log("cityesSelectCctvSidResultUiActive", cityesSelectCctvSidResultUiActive)
-
-        
-
-        const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
-        console.log("cityesSelectCctvSidResult", cityesSelectCctvSidResult)
-
+        // const cityesSelectCctvSid = locations.value?.cctvList?.map((item) => item) || []
+        // const cityesSelectArr = cityesSelect.value?.map((item) => item) || []
+        // const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
+        // const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
         selectBoxSearchReturn(
             startDisappearance,
             endDisappearance,
-            cityesSelectCctvSidResult,
+            selectedCctvSidsResult.value,
+            selectedCctvSidsResultDelAndAdd.value,
             genderSelect.value,
             ageSelect.value,
             typeOfTopSelect.value,
@@ -92,14 +88,13 @@ const selectBoxSearch = () => {
             typeOfBottomSelect.value,
             colorOfBottomSelect.value,
             accSelect.value,
-            selectedCctvSids.value
         )
     }
 }
 
-const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac, scs) => {
-    console.log("1212", ci)
-    console.log("1111", st, en, ci, ge, ag, tyT, coT, tyB, coB, ac, scs)
+const selectBoxSearchReturn = async (st, en, ci, cida, ge, ag, tyT, coT, tyB, coB, ac) => {
+    console.log("ci01", ci)
+    console.log("cida01", cida)
     let acArr;
     if (Array.isArray(ac)) {
         acArr = ac.map((item) => item.concat()).join(',')
@@ -112,10 +107,26 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac,
     if (en === "undefined:00") {
         en = undefined
     }
-    console.log(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
+    if (ci === '') {
+        ci = cida
+    } else if (ci !== '' && cida !== '') {
+        // ci와 cida를 배열로 변환 후 결합
+        const combined = [...new Set([...ci.split(','), ...cida.split(',')])];
+        ci = combined.join(','); // 결과를 다시 문자열로 변환 (필요한 경우)
+    }
+
+    // if (ci === '' && cida !== '') {
+    //     ci = cida;
+    // } else if (ci !== '' && cida !== '') {
+    //     const combined = [ci, cida];
+    //     // Set을 이용해 중복 제거
+    //     ci = Array.from(new Set(combined));
+    // }
+    console.log("ci02", ci)
+    console.log("cida02", cida)
     try {
         const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
-        images.value = response.data?.content || [];
+        images.value = response.data?.content;
         console.log("images.value", images.value)
     } catch (e) {
         console.log('배회인원 찾기 실패', e)
@@ -160,6 +171,11 @@ const placeMarkers = async () => {
                 }
             });
 
+            markers.value.push({
+                marker,
+                city: location.city
+            });
+
             // bounds.extend(new naver.maps.LatLng(location.latitude, location.longitude));
 
             const infowindow = new naver.maps.InfoWindow({
@@ -189,11 +205,24 @@ const placeMarkers = async () => {
                     const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
                     const selectCctvSid = clickCctv.find((item) => item.cctvSid)
                     selectedCctvSids.value.push(selectCctvSid)
+                    selectedCctvSidsResultDelAndAdd.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+                    console.log("selectedCctvSidsResultDelAndAdd.value01", selectedCctvSidsResultDelAndAdd.value)
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',
                         size: new naver.maps.Size(30, 30),
                     });
+
+                    const { _lat, _lng } = marker.position;
+                    const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
+                    const deselectCctvSid = clickCctv.find((item) => item.cctvSid);
+                    if (deselectCctvSid) {
+                        selectedCctvSids.value = selectedCctvSids.value.filter(
+                            (sid) => sid.cctvSid !== deselectCctvSid.cctvSid
+                        );
+                        selectedCctvSidsResultDelAndAdd.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+                        console.log("selectedCctvSidsResultDelAndAdd.value02", selectedCctvSidsResultDelAndAdd.value)
+                    }
                 }
             });
         });
@@ -223,7 +252,7 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
         position: position,
         map: map.value,
         icon: {
-            url: './images/avatars/camera_de_big.png',
+            url: './images/avatars/camera_active_color_big.png',
             size: new naver.maps.Size(40, 40)
         }
     });
@@ -240,24 +269,64 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
         infowindow.close();
     });
 
-    naver.maps.Event.addListener(marker, 'click', () => {
-        const currentIcon = marker.getIcon().url;
-        if (currentIcon === './images/avatars/camera_de_big.png') {
-            marker.setIcon({
-                url: './images/avatars/camera_active_color_big.png',
-                size: new naver.maps.Size(40, 40),
-            });
-        } else {
-            marker.setIcon({
-                url: './images/avatars/camera_de_big.png',
-                size: new naver.maps.Size(40, 40),
-            });
-        }
-    });
+    // naver.maps.Event.addListener(marker, 'click', () => {
+    //     const currentIcon = marker.getIcon().url;
+    //     if (currentIcon === './images/avatars/camera_de_big.png') {
+    //         marker.setIcon({
+    //             url: './images/avatars/camera_active_color_big.png',
+    //             size: new naver.maps.Size(40, 40),
+    //         });
+    //     } else {
+    //         marker.setIcon({
+    //             url: './images/avatars/camera_de_big.png',
+    //             size: new naver.maps.Size(40, 40),
+    //         });
+    //     }
+    // });
 
     // markers.value.fitBounds(bounds);
 };
 
+watch(cityesSelect, (newVal) => {
+    updateMarkersBasedOnCitySelection(newVal);
+});
+
+const updateMarkersBasedOnCitySelection = (selectedCities) => {
+    let firstSelectedMarkerPosition = null;
+
+    markers.value.forEach((markerObj) => {
+        if (selectedCities.includes(markerObj.city)) {
+            markerObj.marker.setIcon({
+                url: './images/avatars/camera_active_color.png',
+                size: new naver.maps.Size(30, 30),
+            });
+
+            if (!firstSelectedMarkerPosition) {
+                firstSelectedMarkerPosition = markerObj.marker.getPosition();
+            }
+
+            const { _lat, _lng } = markerObj.marker.position;
+
+            const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
+            const selectCctvSid = clickCctv.find((item) => item.cctvSid)
+            selectedCctvSids.value.push(selectCctvSid)
+            const uniqueCctvArray = selectedCctvSids.value.filter((obj, index, self) =>
+                index === self.findIndex((o) => o.cctvSid === obj.cctvSid)
+            );
+            const selectedCctvSidsResultBefore = uniqueCctvArray.map(item => item.cctvSid).join(',')
+            selectedCctvSidsResult.value = selectedCctvSidsResultBefore
+        } else {
+            markerObj.marker.setIcon({
+                url: './images/avatars/camera_de.png',
+                size: new naver.maps.Size(30, 30),
+            });
+        }
+    });
+    if (firstSelectedMarkerPosition) {
+        map.value.setCenter(firstSelectedMarkerPosition);
+        map.value.setZoom(10);
+    }
+};
 
 onMounted(async () => {
     map.value = new naver.maps.Map('map', placeMarkers());
