@@ -1,6 +1,7 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUpdated } from 'vue';
 import FindLoitering from '@/api/FindLoitering';
+import uniqBy from 'lodash/uniqBy'
 
 const addRadio = ref("nomal")
 const map = ref([])
@@ -186,6 +187,7 @@ const placeMarkers = async () => {
                     const selectCctvSid = clickCctv.find((item) => item.cctvSid)
                     selectedCctvSids.value.push(selectCctvSid)
                     selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+                    console.log("selectedCctvSidsResult.value01", selectedCctvSidsResult.value)
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',
@@ -200,6 +202,7 @@ const placeMarkers = async () => {
                             (sid) => sid.cctvSid !== deselectCctvSid.cctvSid
                         );
                         selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+                        console.log("selectedCctvSidsResult.value02", selectedCctvSidsResult.value)
                     }
                 }
             });
@@ -225,8 +228,8 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
         position: position,
         map: map.value,
         icon: {
-            url: './images/avatars/camera_active_color_big.png',
-            size: new naver.maps.Size(40, 40)
+            url: './images/avatars/camera_active_color.png',
+            size: new naver.maps.Size(30, 30)
         }
     });
     const infowindow = new naver.maps.InfoWindow({
@@ -244,10 +247,10 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
 
     naver.maps.Event.addListener(marker, 'click', () => {
         const currentIcon = marker.getIcon().url;
-        if (currentIcon === './images/avatars/camera_active_color_big.png') {
+        if (currentIcon === './images/avatars/camera_active_color.png') {
             marker.setIcon({
                 url: './images/avatars/camera_de.png',
-                size: new naver.maps.Size(40, 40),
+                size: new naver.maps.Size(30, 30),
             });
 
             const { _lat, _lng } = marker.position;
@@ -262,7 +265,7 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
         } else {
             marker.setIcon({
                 url: './images/avatars/camera_active_color.png',
-                size: new naver.maps.Size(40, 40),
+                size: new naver.maps.Size(30, 30),
             });
             const { _lat, _lng } = marker.position;
 
@@ -356,6 +359,10 @@ onMounted(async () => {
     typeOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
     colorOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
     accSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+})
+
+onUpdated(async() => {
+    console.log("model",model)
 })
 
 </script>
