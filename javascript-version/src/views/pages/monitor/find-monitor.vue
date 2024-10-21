@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import FindLoitering from '@/api/FindLoitering';
-import { objectKeys, objectMap } from '@antfu/utils';
 
 const addRadio = ref("nomal")
 const map = ref([])
@@ -10,11 +9,10 @@ const controlPage = ref(0)
 const selectedCctvSids = ref([]);
 const markers = ref([]);
 const selectedCctvSidsResult = ref('')
-const selectedCctvSidsResultDelAndAdd = ref('')
-const selectedCctvSidsActiveResult = ref('')
 
 // 슬라이드
 const images = ref([]);
+const imagesTotal = ref()
 
 // 상의 종류
 const typeOfTopSelect = ref()
@@ -54,6 +52,8 @@ const startDisappearanceSelect = ref()
 // 실종구간 (종료)
 const endDisappearanceSelect = ref()
 
+const indexPage = ref(1)
+
 const formatDateTime = (year) => {
     const formattedDate = `${String(year)}:00`
     return formattedDate
@@ -72,15 +72,10 @@ const selectBoxSearch = () => {
             endDisappearanceSelect.value,
         )
 
-        // const cityesSelectCctvSid = locations.value?.cctvList?.map((item) => item) || []
-        // const cityesSelectArr = cityesSelect.value?.map((item) => item) || []
-        // const cityesSelectCctvSidFilter = cityesSelectCctvSid.filter((item) => cityesSelectArr.includes(item.city))
-        // const cityesSelectCctvSidResult = cityesSelectCctvSidFilter.map((item) => item.cctvSid).join(',')
         selectBoxSearchReturn(
             startDisappearance,
             endDisappearance,
             selectedCctvSidsResult.value,
-            selectedCctvSidsResultDelAndAdd.value,
             genderSelect.value,
             ageSelect.value,
             typeOfTopSelect.value,
@@ -92,9 +87,7 @@ const selectBoxSearch = () => {
     }
 }
 
-const selectBoxSearchReturn = async (st, en, ci, cida, ge, ag, tyT, coT, tyB, coB, ac) => {
-    console.log("ci01", ci)
-    console.log("cida01", cida)
+const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac) => {
     let acArr;
     if (Array.isArray(ac)) {
         acArr = ac.map((item) => item.concat()).join(',')
@@ -107,27 +100,18 @@ const selectBoxSearchReturn = async (st, en, ci, cida, ge, ag, tyT, coT, tyB, co
     if (en === "undefined:00") {
         en = undefined
     }
-    if (ci === '') {
-        ci = cida
-    } else if (ci !== '' && cida !== '') {
-        // ci와 cida를 배열로 변환 후 결합
-        const combined = [...new Set([...ci.split(','), ...cida.split(',')])];
-        ci = combined.join(','); // 결과를 다시 문자열로 변환 (필요한 경우)
+    if (ci) {
+        const ciArray = ci.split(',');
+        const uniqueCiArray = [...new Set(ciArray)];
+        ci = uniqueCiArray.join(',');
     }
 
-    // if (ci === '' && cida !== '') {
-    //     ci = cida;
-    // } else if (ci !== '' && cida !== '') {
-    //     const combined = [ci, cida];
-    //     // Set을 이용해 중복 제거
-    //     ci = Array.from(new Set(combined));
-    // }
-    console.log("ci02", ci)
-    console.log("cida02", cida)
     try {
         const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
         images.value = response.data?.content;
+        imagesTotal.value = response.data.totalPages;
         console.log("images.value", images.value)
+        console.log("imagesTotal.value", imagesTotal.value)
     } catch (e) {
         console.log('배회인원 찾기 실패', e)
     }
@@ -155,8 +139,6 @@ const model = ref(0)
 // 초기 렌더링
 const placeMarkers = async () => {
     try {
-        // const bounds = new naver.maps.LatLngBounds();
-
         const response = await FindLoitering.getAllCctv();
         locations.value = response.data;
         cityesItems.value = response.data.cities;
@@ -175,8 +157,6 @@ const placeMarkers = async () => {
                 marker,
                 city: location.city
             });
-
-            // bounds.extend(new naver.maps.LatLng(location.latitude, location.longitude));
 
             const infowindow = new naver.maps.InfoWindow({
                 content: `<div style="padding:10px;"><a href="https://map.naver.com/v5/search/${encodeURIComponent(location.address)}" style="color: rgb(0, 104, 195);">${location.address}</a></div>`,
@@ -205,8 +185,7 @@ const placeMarkers = async () => {
                     const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
                     const selectCctvSid = clickCctv.find((item) => item.cctvSid)
                     selectedCctvSids.value.push(selectCctvSid)
-                    selectedCctvSidsResultDelAndAdd.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
-                    console.log("selectedCctvSidsResultDelAndAdd.value01", selectedCctvSidsResultDelAndAdd.value)
+                    selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',
@@ -220,14 +199,11 @@ const placeMarkers = async () => {
                         selectedCctvSids.value = selectedCctvSids.value.filter(
                             (sid) => sid.cctvSid !== deselectCctvSid.cctvSid
                         );
-                        selectedCctvSidsResultDelAndAdd.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
-                        console.log("selectedCctvSidsResultDelAndAdd.value02", selectedCctvSidsResultDelAndAdd.value)
+                        selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
                     }
                 }
             });
         });
-
-        // map.value.fitBounds(bounds);
 
     } catch (error) {
         console.log("카메라 위치 조회 실패", error);
@@ -240,9 +216,6 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
     if (model.value !== i) {
         model.value = i;
     }
-
-    // markers.value.forEach(marker => marker.setMap(null));
-    // markers.value = [];
 
     const position = new naver.maps.LatLng(latitude, longitude);
     map.value.setCenter(position);
@@ -269,22 +242,36 @@ const slideImgHandleClick = (i, latitude, longitude, address) => {
         infowindow.close();
     });
 
-    // naver.maps.Event.addListener(marker, 'click', () => {
-    //     const currentIcon = marker.getIcon().url;
-    //     if (currentIcon === './images/avatars/camera_de_big.png') {
-    //         marker.setIcon({
-    //             url: './images/avatars/camera_active_color_big.png',
-    //             size: new naver.maps.Size(40, 40),
-    //         });
-    //     } else {
-    //         marker.setIcon({
-    //             url: './images/avatars/camera_de_big.png',
-    //             size: new naver.maps.Size(40, 40),
-    //         });
-    //     }
-    // });
+    naver.maps.Event.addListener(marker, 'click', () => {
+        const currentIcon = marker.getIcon().url;
+        if (currentIcon === './images/avatars/camera_active_color_big.png') {
+            marker.setIcon({
+                url: './images/avatars/camera_de.png',
+                size: new naver.maps.Size(40, 40),
+            });
 
-    // markers.value.fitBounds(bounds);
+            const { _lat, _lng } = marker.position;
+            const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
+            const deselectCctvSid = clickCctv.find((item) => item.cctvSid);
+            if (deselectCctvSid) {
+                selectedCctvSids.value = selectedCctvSids.value.filter(
+                    (sid) => sid.cctvSid !== deselectCctvSid.cctvSid
+                );
+                selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+            }
+        } else {
+            marker.setIcon({
+                url: './images/avatars/camera_active_color.png',
+                size: new naver.maps.Size(40, 40),
+            });
+            const { _lat, _lng } = marker.position;
+
+            const clickCctv = locations.value.cctvList.filter((item) => item.latitude && item.longitude.includes(_lat && _lng))
+            const selectCctvSid = clickCctv.find((item) => item.cctvSid)
+            selectedCctvSids.value.push(selectCctvSid)
+            selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
+        }
+    });
 };
 
 watch(cityesSelect, (newVal) => {
@@ -328,11 +315,47 @@ const updateMarkersBasedOnCitySelection = (selectedCities) => {
     }
 };
 
+const indexPageLoadAllUser = async (page) => {
+    indexPage.value = page;
+    controlPage.value = page - 1;
+    if (startDisappearanceSelect.value >= endDisappearanceSelect.value) {
+        alert("종료구간이 시작구간보다 앞서있거나 같습니다 다시 선택하여 주세요")
+    } else {
+        const startDisappearance = formatDateTime(
+            startDisappearanceSelect.value,
+        )
+
+        const endDisappearance = formatDateTime(
+            endDisappearanceSelect.value,
+        )
+
+        selectBoxSearchReturn(
+            startDisappearance,
+            endDisappearance,
+            selectedCctvSidsResult.value,
+            genderSelect.value,
+            ageSelect.value,
+            typeOfTopSelect.value,
+            colorOfTopSelect.value,
+            typeOfBottomSelect.value,
+            colorOfBottomSelect.value,
+            accSelect.value,
+        )
+    }
+}
+
 onMounted(async () => {
     map.value = new naver.maps.Map('map', placeMarkers());
     await placeMarkers()
 
     await loadSelectBoxDate()
+    genderSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    ageSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    typeOfTopSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    colorOfTopSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    typeOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    colorOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
+    accSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
 })
 
 </script>
@@ -374,39 +397,39 @@ onMounted(async () => {
                             <span>기타 정보</span>
                         </div>
                         <VRow>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="cityesSelect" :items="cityesItems" label="지역선택" multiple
                                     persistent-hint></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="genderSelect" :items="genderItems" item-title="label"
                                     item-value="value" label="성별" persistent-hint></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="ageSelect" :items="ageItems" item-title="label" item-value="value"
                                     label="나이대" persistent-hint></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="typeOfTopSelect" :items="typeOfTopItems" item-title="label"
                                     item-value="value" label="상의 종류" persistent-hint></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="colorOfTopSelect" :items="colorOfTopItems" item-title="label"
                                     item-value="value" label="상의 색상"></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="typeOfBottomSelect" :items="typeOfBottomItems" item-title="label"
                                     item-value="value" label="하의 종류"></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="colorOfBottomSelect" :items="colorOfBottomItems" item-title="label"
                                     item-value="value" label="하의 색상"></v-select>
                             </VCol>
-                            <VCol cols="3" class="pa-1">
+                            <VCol cols="3">
                                 <v-select v-model="accSelect" :items="accItems" label="악세사리" multiple item-title="label"
                                     item-value="value" persistent-hint></v-select>
                             </VCol>
-                            <VCol cols="12" class="pa-1 text-right">
+                            <VCol cols="12" class="py-0 text-right">
                                 <VBtn class="search-user-info" @click="selectBoxSearch">
                                     검색</VBtn>
                             </VCol>
@@ -425,7 +448,7 @@ onMounted(async () => {
 
             <div class="px-6 d-flex gap-5">
                 <div id="map" style="width: 100%; height: 700px" :class="{ 'slideVisibleMap': images[model] }"></div>
-                <div class="click-main-img" :class="{ 'slideVisible': images[model] }" v-if="model !== null">
+                <div class="click-main-img" :class="{ 'slideVisible': images[model] }">
                     <v-expand-transition>
                         <v-sheet v-if="images[model]">
                             <div class="d-flex fill-height align-center justify-center">
@@ -456,6 +479,17 @@ onMounted(async () => {
                     </v-slide-group-item>
                 </v-slide-group>
                 <v-slide-group v-else class="py-4"></v-slide-group>
+                <div class="d-flex justify-center w-100 pb-3">
+                    <nav>
+                        <ul class="d-flex">
+                            <li class="border mx-1 text-center li" v-for="page in imagesTotal" :key="page"
+                                :class="{ active: indexPage === page }">
+                                <span @click.prevent="indexPageLoadAllUser(page)" style="display: block;">{{ page
+                                    }}</span>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </v-sheet>
         </VCard>
     </div>
@@ -528,7 +562,7 @@ select {
 }
 
 .search-user-info {
-    width: 24.5%;
+    width: 23%;
 }
 
 .mdi-paperclip {
@@ -558,5 +592,20 @@ select {
 
 .active-slide {
     opacity: 1;
+}
+
+li {
+    list-style: none;
+    width: 25px;
+    height: 30px;
+    line-height: 30px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+li.active {
+    color: #fff;
+    background: #696CFF;
+    border: none;
 }
 </style>
