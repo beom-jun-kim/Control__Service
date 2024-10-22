@@ -140,8 +140,7 @@ const placeMarkers = async () => {
     try {
         const response = await FindLoitering.getAllCctv();
         locations.value = response.data;
-        cityesItems.value = response.data.cities;
-        console.log("locations.value", locations.value)
+        cityesItems.value = response.data.cities;        
         locations.value.cctvList.forEach(location => {
             const marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(location.latitude, location.longitude),
