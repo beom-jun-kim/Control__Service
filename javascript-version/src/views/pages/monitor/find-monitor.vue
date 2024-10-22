@@ -111,6 +111,7 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac)
     try {
         const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
         images.value = response.data?.content;
+        console.log("images.value",images.value)
         imagesTotal.value = response.data.totalPages;
     } catch (e) {
         console.log('배회인원 찾기 실패', e)
@@ -451,8 +452,7 @@ onMounted(async () => {
             </div>
 
             <div class="px-6 d-flex gap-5">
-                <div id="map" style="width: 100%; height: 700px"
-                    :class="{ 'slideVisibleMap': images[model] && images.length > 0 }"></div>
+                <div id="map" style="width: 100%; height: 700px"></div>
                 <div class="click-main-img" :class="{ 'slideVisible': images[model] && images.length > 0 }">
                     <v-expand-transition>
                         <v-sheet v-if="images[model] && images.length > 0">
@@ -461,6 +461,7 @@ onMounted(async () => {
                             </div>
                             <div class="mt-2">
                                 <span>위치 : {{ images[model].address }}</span><br />
+                                <span>카메라명 : {{ images[model].cctvName }}</span><br />
                                 <span>시간 : {{ images[model].createDate }}</span>
                             </div>
                         </v-sheet>
@@ -578,17 +579,17 @@ select {
     flex: 1;
 }
 
-#map.slideVisibleMap {
+/* #map.slideVisibleMap {
     flex: 3;
-}
+} */
 
 .click-main-img.slideVisible {
-    flex: 1;
+    width: 400px;
 }
 
 .click-main-img img {
     width: 100%;
-    height: 650px;
+    height: 630px;
 }
 
 .anActive {
