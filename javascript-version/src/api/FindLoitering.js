@@ -20,16 +20,6 @@ class FindLoitering {
     cctvSids,
     page
   ) {
-    console.log("cctvSids",cctvSids)
-    console.log("1111",gender,
-      ageGroup,
-      upperType,
-      upperColor,
-      lowerType,
-      lowerColor,
-      startDate,
-      endDate,
-      accessories)
     const params = new URLSearchParams();
 
     if (gender) params.append("gender", gender);

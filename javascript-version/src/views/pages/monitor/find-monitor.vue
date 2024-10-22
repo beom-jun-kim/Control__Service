@@ -62,6 +62,7 @@ const formatDateTime = (year) => {
 
 // 셀렉트 박스 검색
 const selectBoxSearch = () => {
+    model.value = 0;
     if (startDisappearanceSelect.value >= endDisappearanceSelect.value) {
         alert("종료구간이 시작구간보다 앞서있거나 같습니다 다시 선택하여 주세요")
     } else {
@@ -111,8 +112,6 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac)
         const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
         images.value = response.data?.content;
         imagesTotal.value = response.data.totalPages;
-        console.log("images.value", images.value)
-        console.log("imagesTotal.value", imagesTotal.value)
     } catch (e) {
         console.log('배회인원 찾기 실패', e)
     }
@@ -121,7 +120,6 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac)
 const loadSelectBoxDate = async () => {
     try {
         const response = await FindLoitering.getSelectBox()
-        console.log(response.data)
         typeOfTopItems.value = response.data.upperTypes
         colorOfTopItems.value = response.data.upperColors
         typeOfBottomItems.value = response.data.lowerTypes
@@ -187,7 +185,6 @@ const placeMarkers = async () => {
                     const selectCctvSid = clickCctv.find((item) => item.cctvSid)
                     selectedCctvSids.value.push(selectCctvSid)
                     selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
-                    console.log("selectedCctvSidsResult.value01", selectedCctvSidsResult.value)
                 } else {
                     marker.setIcon({
                         url: './images/avatars/camera_de.png',
@@ -202,7 +199,6 @@ const placeMarkers = async () => {
                             (sid) => sid.cctvSid !== deselectCctvSid.cctvSid
                         );
                         selectedCctvSidsResult.value = selectedCctvSids.value.map(item => item.cctvSid).join(',')
-                        console.log("selectedCctvSidsResult.value02", selectedCctvSidsResult.value)
                     }
                 }
             });
@@ -284,6 +280,11 @@ watch(cityesSelect, (newVal) => {
 const updateMarkersBasedOnCitySelection = (selectedCities) => {
     let firstSelectedMarkerPosition = null;
 
+    selectedCctvSids.value = selectedCctvSids.value.filter((cctv) =>
+        selectedCities.includes(cctv.city)
+    );
+
+
     markers.value.forEach((markerObj) => {
         if (selectedCities.includes(markerObj.city)) {
             markerObj.marker.setIcon({
@@ -319,6 +320,7 @@ const updateMarkersBasedOnCitySelection = (selectedCities) => {
 };
 
 const indexPageLoadAllUser = async (page) => {
+    model.value = 0;
     indexPage.value = page;
     controlPage.value = page - 1;
     if (startDisappearanceSelect.value >= endDisappearanceSelect.value) {
@@ -359,10 +361,6 @@ onMounted(async () => {
     typeOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
     colorOfBottomSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
     accSelect.value = genderItems.value[genderItems.value.length - 1]?.value;
-})
-
-onUpdated(async() => {
-    console.log("model",model)
 })
 
 </script>
@@ -454,10 +452,11 @@ onUpdated(async() => {
             </div>
 
             <div class="px-6 d-flex gap-5">
-                <div id="map" style="width: 100%; height: 700px" :class="{ 'slideVisibleMap': images[model] }"></div>
-                <div class="click-main-img" :class="{ 'slideVisible': images[model] }">
+                <div id="map" style="width: 100%; height: 700px"
+                    :class="{ 'slideVisibleMap': images[model] && images.length > 0 }"></div>
+                <div class="click-main-img" :class="{ 'slideVisible': images[model] && images.length > 0 }">
                     <v-expand-transition>
-                        <v-sheet v-if="images[model]">
+                        <v-sheet v-if="images[model] && images.length > 0">
                             <div class="d-flex fill-height align-center justify-center">
                                 <img :src="`http://localhost:8082/uploads/${images[model]?.fileName}`" alt="선택된 이미지" />
                             </div>
