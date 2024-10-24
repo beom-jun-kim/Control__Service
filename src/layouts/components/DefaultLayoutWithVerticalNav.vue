@@ -79,7 +79,7 @@ onMounted(() => {
     </template>
 
     <template #vertical-nav-content>
-      <NavItems />
+      <NavItems :getUser="getUser" />
     </template>
 
     <!-- 👉 Pages -->
