@@ -51,6 +51,11 @@ export const routes = [
         component: () =>
           import("@/views/pages/guardian-manage/guardian-info-detail.vue"),
       },
+      {
+        path: "/manage-management",
+        component: () =>
+          import("@/views/pages/manage/manage-management.vue"),
+      },
     ],
   },
   {

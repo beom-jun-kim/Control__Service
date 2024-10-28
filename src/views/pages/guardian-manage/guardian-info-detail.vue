@@ -21,7 +21,6 @@ const loadGuardianUserList = async (id) => {
     try {
         const response = await Control.getGuardianUserList(id)
         guardianUserList.value = response.data
-        console.log("guardianUserList.value", guardianUserList.value)
     } catch (e) {
         console.lg("조회 실패", e)
     }
