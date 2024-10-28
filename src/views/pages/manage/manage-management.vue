@@ -30,7 +30,7 @@ const getAllRole = async () => {
         const response = await Manage.getRoleList()
         role.value = response.data;
     } catch (error) {
-        console.log("관관리자제 유저 권한 조회 실패", error);
+        console.log("관리자 유저 권한 조회 실패", error);
     }
 }
 

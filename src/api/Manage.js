@@ -10,7 +10,7 @@ class Manage {
     return await http.get("/role/list");
   }
   async patchRole(data) {
-    return await http.patch("/user/role",data);
+    return await http.patch("/user/role", data);
   }
 }
 

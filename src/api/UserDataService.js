@@ -34,6 +34,9 @@ class UserDataService {
   async logout() {
     return await http.post("/auth/logout");
   }
+  async getAffiliation() {
+    return await http.get("/code/affiliation");
+  }
 }
 
 export default new UserDataService();

@@ -100,6 +100,10 @@ const isPasswordVisible = ref(false)
                                 <VTextField v-model="form.phoneNumber" :label="getUser.phoneNumber"
                                     placeholder="'-'없이 입력" required />
                             </VCol>
+
+                            <VCol cols="12">
+                                <VTextField :value="getUser.codeName" readonly/>
+                            </VCol>
                             <VCol cols="12">
                                 <VBtn type="submit" block>내 정보 저장</VBtn>
                             </VCol>
