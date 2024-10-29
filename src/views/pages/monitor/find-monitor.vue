@@ -111,7 +111,6 @@ const selectBoxSearchReturn = async (st, en, ci, ge, ag, tyT, coT, tyB, coB, ac)
     try {
         const response = await FindLoitering.getDisapSearch(ge, ag, tyT, coT, tyB, coB, st, en, acArr, ci, controlPage.value)
         images.value = response.data?.content;
-        console.log("images.value",images.value)
         imagesTotal.value = response.data.totalPages;
     } catch (e) {
         console.log('배회인원 찾기 실패', e)

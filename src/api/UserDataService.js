@@ -37,6 +37,9 @@ class UserDataService {
   async getAffiliation() {
     return await http.get("/code/affiliation");
   }
+  async joinIdCommonCheck(id) {
+    return await http.get(`/user/check/${id}`);
+  }
 }
 
 export default new UserDataService();
