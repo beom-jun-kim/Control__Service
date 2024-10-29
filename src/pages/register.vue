@@ -5,6 +5,7 @@
 import UserDataService from '@/api/UserDataService';
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
+import { watch } from 'vue';
 
 const router = useRouter();
 
@@ -26,6 +27,20 @@ const isAuthCodeSentTextTrans = ref(false)
 const signupBtn = ref(true)
 const timer = ref(300)
 const interval = ref(null)
+const existsUser = ref(false)
+
+const idCommonCheck = async (newValue) => {
+  try {
+    const response = await UserDataService.joinIdCommonCheck(newValue)
+    existsUser.value = response.data.existsUser
+  } catch (e) {
+    console.log("아이디 중복 체크 실패", e);
+  }
+}
+
+watch(() => form.value.email, (newValue) => {
+  idCommonCheck(newValue)
+})
 
 const loadAffiliationCode = async () => {
   try {
@@ -184,6 +199,7 @@ onMounted(() => {
               <VCol cols="12">
                 <VTextField v-model="form.email" label="아이디" type="email" placeholder="example@email.com" autofocus
                   :disabled="isAuthCodeSent" required />
+                <p v-if="existsUser" class="mt-1 mb-0">이미 있는 아이디입니다</p>
               </VCol>
 
               <VCol cols="12">

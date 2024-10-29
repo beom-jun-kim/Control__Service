@@ -63,8 +63,7 @@ const statusSave = async () => {
                     .map(user => ({
                         userSid: user.userSid,
                         roleSid: user.roleSid,
-                    }));
-                console.log("data",data)
+                    }));                
                 await Manage.patchRole(data)
                 alert("수정되었습니다");
                 await getAllUser();
